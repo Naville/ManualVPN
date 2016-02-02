@@ -1,0 +1,27 @@
+entry = {
+  bundle = AppList;
+  cell = PSLinkCell;
+  icon = "/Library/PreferenceLoader/Preferences/ManualVPN.jpg";
+  isController = 1;
+  label = "Introspy - Apps";
+  ALSettingsPath = "/var/mobile/Library/Preferences/naville.manualvpn.plist";
+  ALSettingsPath = ""
+  ALChangeNotification = "naville.manualvpn";
+  ALAllowsSelection = 1;
+  ALSectionDescriptors = (
+    {
+      title = "System Applications";
+      predicate = "isSystemApplication = TRUE";
+      "cell-class-name" = "ALSwitchCell";
+      "icon-size" = 29;
+      "suppress-hidden-apps" = 0;
+    },
+    {
+      title = "User Applications";
+      predicate = "isSystemApplication = FALSE";
+      "cell-class-name" = "ALSwitchCell";
+      "icon-size" = 29;
+      "suppress-hidden-apps" = 0;
+    }
+  );
+};
