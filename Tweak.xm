@@ -1,5 +1,11 @@
 #import <objc/runtime.h>
 #import <substrate.h>
+//NSString* curAppbundleID=[[NSBundle mainBundle] bundleIdentifier];
+@interface SBApplication:NSObject{
+
+}
+-(id)bundleIdentifier;
+@end
 @interface VPNController : NSObject {
 
 	id _statusSpecifier;
@@ -26,7 +32,9 @@
 -(void)activateVPN:(id)arg1 ;
 @end
 
-static void load(){
+static void load(NSString* bundleID){
+NSArray* allowsList=[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/naville.manualvpn.plist"].allKeys;
+if(bundleID!=nil && allowsList!=nil &&[allowsList containsObject:bundleID]){
 NSBundle* VPNPreferences=[NSBundle bundleWithPath:@"/System/Library/PreferenceBundles/VPNPreferences.bundle"];
 if([VPNPreferences load]==YES){
 Class VPB=objc_getClass("VPNController");
@@ -48,13 +56,19 @@ else{
 NSLog(@"VPNPreferences.bundle Loading Failed");
 }
 }
-
-
-void __attribute__((constructor)) SaitoAsuka(){
-NSString* bundleID=[[NSBundle mainBundle] bundleIdentifier];
-NSArray* allowsList=[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/naville.manualvpn.plist"].allKeys;
-if(bundleID!=nil && allowsList!=nil &&[allowsList containsObject:bundleID]){
-	load();
 }
+%hook SBUIController
+- (void)activateApplication:(SBApplication*)arg1{
+	NSLog(@">>>>>>activateApplication With Bundle ID:%@",[arg1 bundleIdentifier]);
+	load([arg1 bundleIdentifier]);
+	%orig;
 
 }
+- (void)activateApplication:(SBApplication*)arg1 fromIcon:(id)arg2 location:(int)arg3{
+	NSLog(@">>>>>>activateApplication:fromIcon:location: With Bundle ID:%@",[arg1 bundleIdentifier]);
+	load([arg1 bundleIdentifier]);
+	%orig;
+
+}
+
+%end
