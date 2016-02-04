@@ -33,7 +33,7 @@
 @end
 
 static void load(NSString* bundleID){
-NSArray* allowsList=[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/naville.manualvpn.plist"];
+NSDictionary* allowsList=[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/naville.manualvpn.plist"];
 if(bundleID!=nil && allowsList!=nil &&[allowsList.allKeys containsObject:bundleID] &&[[allowsList objectForKey:bundleID] boolValue]==YES ){
 NSBundle* VPNPreferences=[NSBundle bundleWithPath:@"/System/Library/PreferenceBundles/VPNPreferences.bundle"];
 if([VPNPreferences load]==YES){
