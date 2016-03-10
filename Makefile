@@ -2,6 +2,7 @@ include theos/makefiles/common.mk
 
 TWEAK_NAME = ManualVPN
 ManualVPN_FILES = Tweak.xm
+ManualVPN_FRAMEWORKS = UIKit
 export ARCHS = armv7 armv7s arm64
 export TARGET = iphone:clang:7.0:7.0
 ADDITIONAL_CCFLAGS  = -Qunused-arguments

@@ -1,5 +1,6 @@
 #import <objc/runtime.h>
 #import <substrate.h>
+#import <UIKit/UIKit.h>
 //NSString* curAppbundleID=[[NSBundle mainBundle] bundleIdentifier];
 @interface SBApplication:NSObject{
 
@@ -31,6 +32,7 @@
 @property (getter=isRootMenuItem) char rootMenuItem;                                  //@synthesize rootMenuItem=_rootMenuItem - In the implementation block
 @property (getter=isToggleSwitchInRootMenu) char toggleSwitchInRootMenu;              //@synthesize toggleSwitchInRootMenu=_toggleSwitchInRootMenu - In the implementation block
 @property (getter=isRegistered) char registered;                                      //@synthesize registered=_registered - In the implementation block
+-(id)initWithParentListController:(id)Meh;
 +(char)networkingIsDisabled;
 +(void)disableAirplaneMode;
 -(char)isRegistered;
@@ -42,7 +44,8 @@
 //-(PSSpecifier *)vpnSpecifier;
 //-(PSConfirmationSpecifier *)toggleVPNSpecifier;
 -(void)vpnStatusChanged:(id)arg1 ;
--(void)setVPNActive:(char)arg1 ;
+-(void)setVPNActive:(BOOL)arg1 ;
+-(void)_setVPNActive:(BOOL)arg1 ;
 -(void)setVPNActive:(id)arg1 forSpecifier:(id)arg2 ;
 -(id)vpnActiveForSpecifier:(id)arg1 ;
 //-(void)setToggleVPNSpecifier:(PSConfirmationSpecifier *)arg1 ;
@@ -95,7 +98,7 @@
 -(void)showStatus:(id)arg1 ;
 -(void)activateVPN:(id)arg1 ;
 @end
-static BOOL isVPNOn(NSArray* specList){
+/*static BOOL isVPNOn(NSArray* specList){
 VPNBundleController* VPBC=[[objc_getClass("VPNBundleController") alloc] init];
 for(int i=0;i<[specList count];i++){
 	if([[VPBC vpnActiveForSpecifier:[specList objectAtIndex:i]] boolValue]==YES){
@@ -104,37 +107,61 @@ for(int i=0;i<[specList count];i++){
 
 }
 return NO;
-}
+}*/
 static void load(NSString* bundleID){
 NSDictionary* allowsList=[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/naville.manualvpn.plist"];
 if(bundleID!=nil && allowsList!=nil &&[allowsList.allKeys containsObject:bundleID] &&[[allowsList objectForKey:bundleID] boolValue]==YES ){
 NSBundle* VPNPreferences=[NSBundle bundleWithPath:@"/System/Library/PreferenceBundles/VPNPreferences.bundle"];
 if([VPNPreferences load]==YES){
-	Class VPB=objc_getClass("VPNController");
-	if(VPB!=NULL){
-		NSLog(@"VPNController Loaded");
-	}
-	VPNController* VNC=[[VPB alloc] init];
-	[VNC updateVPNConfigurationsList];
-	NSArray* sps=[VNC specifiers];
-	if(isVPNOn(sps)){
-	NSOperatingSystemVersion ios9_0_1 = (NSOperatingSystemVersion){9, 0, 1};
-   	if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios9_0_1]) {
-      /*[VNC startPersonalConnection:[sps objectAtIndex:0]];
-      [VNC startEnterpriseConnection:[sps objectAtIndex:0]];
-      NSLog(@"startedPersonalConnection iOS9");*/
-      [VNC connect];
-   	} 
-   	else {
-		[VNC activateVPN:[sps objectAtIndex:0]];
-		NSLog(@"startedPersonalConnection iOS8");
-   }
-		NSLog(@"VPN already started, skipping");			
+	Class VPC=objc_getClass("VPNBundleController");
+	if(VPC!=NULL){
+		NSLog(@"VPNBundleController Loaded");
+		VPNBundleController* VPNBC=[[VPC alloc] initWithParentListController:nil];
+		id PSS=[VPNBC valueForKey:@"_vpnSpecifier"];
+		if([[VPNBC vpnActiveForSpecifier:PSS] boolValue]==YES){
+			   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Ooops" 
+                                                    message:@"VPN Already Connected" 
+                                                    delegate:nil
+                                                    cancelButtonTitle:@"OK" 
+                                                    otherButtonTitles:nil];
+    			[alert show];
+    			[alert release];
+
+
 		}
+		else{
+
+			if([VPNBC respondsToSelector:@selector(setVPNActive:)]){
+				[VPNBC setVPNActive:YES];
+			}
+			else if([VPNBC respondsToSelector:@selector(_setVPNActive:)]){
+					[VPNBC _setVPNActive:YES];
+			}
+			else{
+    		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Ooops" 
+                                                    message:@"Failed To Call Connecting Method" 
+                                                    delegate:nil
+                                                    cancelButtonTitle:@"OK" 
+                                                    otherButtonTitles:nil];
+    			[alert show];
+    			[alert release];
+
+			}
+		}
+		[VPNBC release];
+	}
 
 }
 else{
 NSLog(@"VPNPreferences.bundle Loading Failed");
+			   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Ooops" 
+                                                    message:@"VPNPreferences.bundle Loading Failed" 
+                                                    delegate:nil
+                                                    cancelButtonTitle:@"OK" 
+                                                    otherButtonTitles:nil];
+    			[alert show];
+    			[alert release];
+
 }
 }
 }
