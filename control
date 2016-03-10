@@ -1,7 +1,7 @@
 Package: naville.manualvpn
 Name: ManualVPN
 Depends: mobilesubstrate
-Version: 0.0.1
+Version: 4.0.0
 Architecture: iphoneos-arm
 Description: An awesome MobileSubstrate tweak!
 Maintainer: Naville
